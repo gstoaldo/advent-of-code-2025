@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/gstoaldo/advent-of-code-2025/utils"
@@ -36,7 +37,49 @@ func countFresh(intervals [][]int, ids []int) (result int) {
 	return result
 }
 
+func overlaps(a, b []int) bool {
+	return a[0] <= b[1] && b[0] <= a[1]
+}
+
+func mergeIntervals(intervals [][]int) (result [][]int) {
+	// sort intervals by start
+	sort.Slice(intervals, func(i, j int) bool {
+		return intervals[i][0] < intervals[j][0]
+	})
+
+	curr := intervals[0]
+
+	for i := 1; i < len(intervals); i++ {
+		next := intervals[i]
+
+		// If the two intervals overlap, merge them into a single interval
+		// spanning from the minimum start to the maximum end.
+		if overlaps(curr, next) {
+			curr = []int{min(curr[0], next[0]), max(curr[1], next[1])}
+			continue
+		}
+
+		result = append(result, curr)
+		curr = next
+	}
+
+	result = append(result, curr)
+
+	return result
+}
+
+func countFreshIntervals(intervals [][]int) (result int) {
+	merged := mergeIntervals(intervals)
+
+	for _, interval := range merged {
+		result += interval[1] - interval[0] + 1
+	}
+
+	return result
+}
+
 func main() {
 	intervals, ids := parse(utils.FilePath())
 	fmt.Println("p1:", countFresh(intervals, ids))
+	fmt.Println("p2:", countFreshIntervals(intervals))
 }
