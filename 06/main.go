@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/gstoaldo/advent-of-code-2025/utils"
@@ -13,7 +14,7 @@ func split(line string) []string {
 	return re.Split(strings.TrimSpace(line), -1)
 }
 
-func parse(path string) ([][]int, []string) {
+func parseP1(path string) ([][]int, []string) {
 	lines := utils.ReadLines(path)
 	problemSize := len(lines) - 1
 	nproblems := len(split(lines[0]))
@@ -31,6 +32,40 @@ func parse(path string) ([][]int, []string) {
 	}
 
 	operations := split(lines[len(lines)-1])
+
+	return problems, operations
+}
+
+func parseP2(path string) ([][]int, []string) {
+	lines := utils.ReadLines(path)
+	problemSize := len(lines) - 1
+
+	problems := [][]int{}
+	nums := []int{}
+
+	// read chas top-down, right-left and concatenate each column
+	// if column is empty, starts a new problem
+	for j := len(lines[0]) - 1; j >= 0; j-- {
+		numStr := ""
+		for i := range problemSize {
+			numStr += string(lines[i][j])
+		}
+
+		numStr = strings.TrimSpace(numStr)
+
+		if numStr == "" {
+			// empty column
+			problems = append(problems, nums)
+			nums = []int{}
+		} else {
+			nums = append(nums, utils.ToInt(numStr))
+		}
+	}
+
+	problems = append(problems, nums)
+
+	operations := split(lines[len(lines)-1])
+	slices.Reverse(operations)
 
 	return problems, operations
 }
@@ -56,6 +91,6 @@ func total(problems [][]int, operations []string) (result int) {
 }
 
 func main() {
-	problems, operations := parse(utils.FilePath())
-	fmt.Println("p1:", total(problems, operations))
+	fmt.Println("p1:", total(parseP1(utils.FilePath())))
+	fmt.Println("p2:", total(parseP2(utils.FilePath())))
 }
