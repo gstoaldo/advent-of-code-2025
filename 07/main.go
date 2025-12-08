@@ -39,7 +39,37 @@ func run(lines []string, start int) int {
 	return result
 }
 
+func timeline(lines []string, start int) int {
+	type key struct{ i, j int }
+	cache := map[key]int{}
+	var run func(i, j int) int
+
+	run = func(i, j int) int {
+		if val, ok := cache[key{i, j}]; ok {
+			return val
+		}
+
+		if i == len(lines)-1 {
+			return 1
+		}
+
+		if lines[i][j] == '^' {
+			result := run(i+1, j-1) + run(i+1, j+1)
+			cache[key{i, j}] = result
+			return result
+		}
+
+		result := run(i+1, j)
+		cache[key{i, j}] = result
+
+		return result
+	}
+
+	return run(0, start)
+}
+
 func main() {
 	lines, start := parse(utils.FilePath())
 	fmt.Println("p1:", run(lines, start))
+	fmt.Println("p2:", timeline(lines, start))
 }
