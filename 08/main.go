@@ -30,7 +30,7 @@ func dist(a, b []int) float64 {
 	return math.Sqrt(float64(squaredSum))
 }
 
-func circuitProduct(positions [][]int, kmax int) int {
+func circuitProduct(positions [][]int, kmax int) (product int, productLastMerge int) {
 	type pair struct {
 		i, j int
 		dist float64
@@ -85,6 +85,11 @@ func circuitProduct(positions [][]int, kmax int) int {
 		if !mergedJ {
 			circuits[pair.j] = circuits[pair.i]
 		}
+
+		if len(circuits) == len(positions) {
+			// last merge
+			return 0, positions[pair.i][0] * positions[pair.j][0]
+		}
 	}
 
 	sizesMap := map[int]int{}
@@ -104,10 +109,14 @@ func circuitProduct(positions [][]int, kmax int) int {
 		result *= v
 	}
 
-	return result
+	return result, 0
 }
 
 func main() {
 	positions := parse(utils.FilePath())
-	fmt.Println("p1:", circuitProduct(positions, 1000))
+	p1, _ := circuitProduct(positions, 1000)
+	fmt.Println("p1:", p1)
+
+	_, p2 := circuitProduct(positions, 9_999_999)
+	fmt.Println("p2:", p2)
 }
